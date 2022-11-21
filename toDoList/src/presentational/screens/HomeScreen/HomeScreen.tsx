@@ -1,11 +1,33 @@
 import React from 'react';
 import styled from 'styled-components/native';
 
+import Task from './Task';
+
 import Logo from '@/assets/Logo.svg';
 import PlusIcon from '@/assets/plus.svg';
-import empty from '@/assets/Empty.png';
+
+function handleParticipanteAdd() {
+  console.log('Você adicionou uma task');
+}
+
+function handleParticipanteRemove(name: string) {
+  console.log(`Você removeu um participante ${name}`);
+}
 
 const HomeScreen = () => {
+  const myTasks = [
+    'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry',
+    'Hoje é dia de fazer uns testes no codigo de mobile',
+    'Tenho que comprar ração pro cachorro',
+    'Comprar pão na padaria',
+    'Comprar saco de ração pra cachorra',
+    'Comprar remedio cara para a piedade',
+    'Cair no soco com um assaltante',
+    'Task Aleatoria 1 ',
+    'Task Aleatoria 2',
+    'Task Aleatoria 3',
+    'Task Aleatoria 4'
+  ];
   return (
     <StyledView>
       <StyledHeader>
@@ -14,7 +36,7 @@ const HomeScreen = () => {
         </StyledLogo>
         <StyledTask>
           <StyledAddTask placeholder='Adicione uma nova tarefa' placeholderTextColor={'#F2F2F2'} />
-          <StyledButtonAdd>
+          <StyledButtonAdd onPress={handleParticipanteAdd}>
             <PlusIcon />
           </StyledButtonAdd>
         </StyledTask>
@@ -24,7 +46,7 @@ const HomeScreen = () => {
           <StyledCreatedTask>
             <StyledText>Criadas</StyledText>
             <StyledCountTask>
-              <StyledCountText> 0</StyledCountText>
+              <StyledCountText>0</StyledCountText>
             </StyledCountTask>
           </StyledCreatedTask>
           <StyledFinishedTask>
@@ -37,7 +59,11 @@ const HomeScreen = () => {
       </StyledContent>
       <StyledLine />
       <StyledContentTasks>
-        <StyledEmptyTasks source={empty} />
+        {myTasks.map(task => (
+          <Task key={task} taskName={task} onTaskRemove={() => handleParticipanteRemove('Lorem')} />
+        ))}
+
+        {/* <StyledEmptyTasks source={empty} /> */}
       </StyledContentTasks>
     </StyledView>
   );
@@ -137,7 +163,6 @@ const StyledLine = styled.View`
 
 const StyledContentTasks = styled.View`
   flex: 1;
-  align-items: center;
   margin: 20px 24px;
   border-top: 4px;
   border-color: ${({ theme }) => theme.colors.blueDark};

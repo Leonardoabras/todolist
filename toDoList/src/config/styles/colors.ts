@@ -5,6 +5,7 @@ const COLORS = {
   gray400: '#333333',
   gray500: '#262626',
   heading: '#0D0D0D',
+  blue: '#4EA8DE',
   blueDark: '#1E6F9F',
   purple: '#8284FA',
   purpleDark: '#5E60CE'
