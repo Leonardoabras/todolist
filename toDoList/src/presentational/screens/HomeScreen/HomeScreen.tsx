@@ -1,33 +1,39 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components/native';
+
+import { FlatList, Alert } from 'react-native';
 
 import Task from './Task';
 
 import Logo from '@/assets/Logo.svg';
 import PlusIcon from '@/assets/plus.svg';
 
-function handleParticipanteAdd() {
-  console.log('Você adicionou uma task');
-}
-
-function handleParticipanteRemove(name: string) {
-  console.log(`Você removeu um participante ${name}`);
-}
+import empty from '@/assets/Empty.png';
 
 const HomeScreen = () => {
-  const myTasks = [
-    'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry',
-    'Hoje é dia de fazer uns testes no codigo de mobile',
-    'Tenho que comprar ração pro cachorro',
-    'Comprar pão na padaria',
-    'Comprar saco de ração pra cachorra',
-    'Comprar remedio cara para a piedade',
-    'Cair no soco com um assaltante',
-    'Task Aleatoria 1 ',
-    'Task Aleatoria 2',
-    'Task Aleatoria 3',
-    'Task Aleatoria 4'
-  ];
+  const [myTasks, setMyTasks] = useState<string[]>([]);
+  const [taskName, setTaskName] = useState('');
+
+  function handleParticipanteAdd() {
+    if (myTasks.includes(taskName)) {
+      return Alert.alert('Task repetida', 'Você criou uma nova tarefa com o mesmo nome');
+    }
+    setMyTasks(prevState => [...prevState, taskName]);
+    setTaskName('');
+  }
+
+  function handleParticipanteRemove(name: string) {
+    Alert.alert('Remover a tarefa', `${name} ?`, [
+      {
+        text: 'Sim',
+        onPress: () => Alert.alert('Deletado')
+      },
+      {
+        text: 'Não',
+        style: 'cancel'
+      }
+    ]);
+  }
   return (
     <StyledView>
       <StyledHeader>
@@ -35,7 +41,12 @@ const HomeScreen = () => {
           <Logo />
         </StyledLogo>
         <StyledTask>
-          <StyledAddTask placeholder='Adicione uma nova tarefa' placeholderTextColor={'#F2F2F2'} />
+          <StyledAddTask
+            placeholder='Adicione uma nova tarefa'
+            placeholderTextColor={'#F2F2F2'}
+            onChangeText={setTaskName}
+            value={taskName}
+          />
           <StyledButtonAdd onPress={handleParticipanteAdd}>
             <PlusIcon />
           </StyledButtonAdd>
@@ -59,11 +70,19 @@ const HomeScreen = () => {
       </StyledContent>
       <StyledLine />
       <StyledContentTasks>
-        {myTasks.map(task => (
-          <Task key={task} taskName={task} onTaskRemove={() => handleParticipanteRemove('Lorem')} />
-        ))}
-
-        {/* <StyledEmptyTasks source={empty} /> */}
+        <FlatList
+          data={myTasks}
+          keyExtractor={item => item}
+          renderItem={({ item }) => (
+            <Task key={item} taskName={item} onTaskRemove={() => handleParticipanteRemove(item)} />
+          )}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={() => (
+            <StyledEmptyView>
+              <StyledEmptyTasks source={empty} />
+            </StyledEmptyView>
+          )}
+        />
       </StyledContentTasks>
     </StyledView>
   );
@@ -168,5 +187,9 @@ const StyledContentTasks = styled.View`
   border-color: ${({ theme }) => theme.colors.blueDark};
 `;
 
+const StyledEmptyView = styled.View`
+  justify-content: center;
+  align-items: center;
+`;
 const StyledEmptyTasks = styled.Image``;
 export default HomeScreen;
