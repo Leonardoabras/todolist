@@ -3,7 +3,7 @@ import styled from 'styled-components/native';
 
 import { FlatList, Alert } from 'react-native';
 
-import Task from './Task';
+import Task, { TaskData } from './Task';
 
 import Logo from '@/assets/Logo.svg';
 import PlusIcon from '@/assets/plus.svg';
@@ -11,22 +11,22 @@ import PlusIcon from '@/assets/plus.svg';
 import empty from '@/assets/Empty.png';
 
 const HomeScreen = () => {
-  const [myTasks, setMyTasks] = useState<string[]>([]);
+  const [tasks, setTasks] = useState<TaskData[]>([]);
   const [taskName, setTaskName] = useState('');
+  const [selected, setSelected] = useState<number[]>([]);
 
-  function handleParticipanteAdd() {
-    if (myTasks.includes(taskName)) {
-      return Alert.alert('Task repetida', 'Você criou uma nova tarefa com o mesmo nome');
-    }
-    setMyTasks(prevState => [...prevState, taskName]);
+  function handleAddTask() {
+    const task: TaskData = { id: Math.random(), name: taskName };
+    setTasks(prevState => [task, ...prevState]);
     setTaskName('');
   }
 
-  function handleParticipanteRemove(name: string) {
-    Alert.alert('Remover a tarefa', `${name} ?`, [
+  function handleValidateRemoveTask(id: number) {
+    const task = tasks.find(item => item.id === id);
+    Alert.alert('Remover a tarefa', `${task?.name} ?`, [
       {
         text: 'Sim',
-        onPress: () => Alert.alert('Deletado')
+        onPress: () => handleRemoveTask(id)
       },
       {
         text: 'Não',
@@ -34,6 +34,21 @@ const HomeScreen = () => {
       }
     ]);
   }
+
+  function handleRemoveTask(id: number) {
+    setTasks(prevState => prevState.filter(task => task.id !== id));
+  }
+
+  function handleSelectedTask(id: number) {
+    setSelected(prevState => {
+      if (prevState.includes(id)) {
+        return prevState.filter(selectedTask => selectedTask !== id);
+      }
+
+      return [...prevState, id];
+    });
+  }
+
   return (
     <StyledView>
       <StyledHeader>
@@ -47,7 +62,7 @@ const HomeScreen = () => {
             onChangeText={setTaskName}
             value={taskName}
           />
-          <StyledButtonAdd onPress={handleParticipanteAdd}>
+          <StyledButtonAdd onPress={handleAddTask}>
             <PlusIcon />
           </StyledButtonAdd>
         </StyledTask>
@@ -57,13 +72,13 @@ const HomeScreen = () => {
           <StyledCreatedTask>
             <StyledText>Criadas</StyledText>
             <StyledCountTask>
-              <StyledCountText>0</StyledCountText>
+              <StyledCountText>{tasks.length}</StyledCountText>
             </StyledCountTask>
           </StyledCreatedTask>
           <StyledFinishedTask>
             <StyledFinishedText>Concluídas</StyledFinishedText>
             <StyledCountTask>
-              <StyledCountText>0</StyledCountText>
+              <StyledCountText>{selected.length}</StyledCountText>
             </StyledCountTask>
           </StyledFinishedTask>
         </StyledContentHeader>
@@ -71,10 +86,16 @@ const HomeScreen = () => {
       <StyledLine />
       <StyledContentTasks>
         <FlatList
-          data={myTasks}
-          keyExtractor={item => item}
+          data={tasks}
+          keyExtractor={item => item.id.toString()}
           renderItem={({ item }) => (
-            <Task key={item} taskName={item} onTaskRemove={() => handleParticipanteRemove(item)} />
+            <Task
+              key={item.id}
+              data={item}
+              onTaskRemove={handleValidateRemoveTask}
+              onSelectedTask={handleSelectedTask}
+              checked={selected.includes(item.id)}
+            />
           )}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={() => (
